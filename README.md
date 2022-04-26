@@ -35,8 +35,6 @@ efs.destroy()
 
 ```
 
-
-
 # Actions
 
 ## List files
