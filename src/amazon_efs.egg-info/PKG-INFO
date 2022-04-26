@@ -1,3 +1,16 @@
+Metadata-Version: 2.1
+Name: amazon-efs
+Version: 0.0.8
+Summary: Amazon EFS (amazon-efs) allows programmatically manipulate EFS data (create, read, delete, list files) from any machine.
+Home-page: https://github.com/kankou-aliaksei/amazon-efs
+Author: Aliaksei Kankou
+Author-email: aliaksei.kankou@gmail.com
+License: UNKNOWN
+Project-URL: Bug Tracker, https://github.com/kankou-aliaksei/amazon-efs/issues
+Platform: UNKNOWN
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+
 # Amazon EFS (amazon-efs)
 
 Amazon EFS (amazon-efs) allows programmatically manipulate EFS data (create, read, delete, list files) from any machine.
@@ -30,7 +43,7 @@ efs = Efs(efs_id)
 efs.init()
 # Actions (e.g. list_files, upload, download, delete)
 files_list = efs.list_files()
-# Don't forget to destroy underlying resources at the end of the session
+# Don't forget to destroy underlying resources
 efs.destroy()
 
 ```
@@ -170,3 +183,5 @@ print(files_list)
 
 efs.destroy()
 ```
+
+
