@@ -1,6 +1,6 @@
 # Amazon EFS (amazon-efs)
 
-Amazon EFS (amazon-efs) allows you to interact with EFS (Amazon Elastic File System) from your local computer or on-prem
+Amazon EFS (amazon-efs) allows programmatically manipulate EFS data (create, read, delete, list files) from any machine.
 
 # Prerequisites
 * python
@@ -21,6 +21,11 @@ EFS should have at least one mount target in a Private subnet
 # Basics
 
 ```
+from amazon_efs import Efs
+
+efs_id = 'fs-0d74736bfc*******'
+efs = Efs(efs_id)
+
 # Deploying required underlying resources
 efs.init()
 # Actions (e.g. list_files, upload, download, delete)

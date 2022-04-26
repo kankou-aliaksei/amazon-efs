@@ -251,12 +251,16 @@ class Efs:
                     MountTargetId=self.__state['mount_target_id']
                 )['SecurityGroups']
 
-                mount_target_security_groups.remove(self.__state['mount_target_security_group_id'])
+                if self.__state['mount_target_security_group_id'] in mount_target_security_groups:
+                    mount_target_security_groups.remove(self.__state['mount_target_security_group_id'])
 
-                self.clients['efs'].modify_mount_target_security_groups(
-                    MountTargetId=self.__state['mount_target_id'],
-                    SecurityGroups=mount_target_security_groups
-                )
+                    self.clients['efs'].modify_mount_target_security_groups(
+                        MountTargetId=self.__state['mount_target_id'],
+                        SecurityGroups=mount_target_security_groups
+                    )
+                else:
+                    logging.warning(
+                        f'{self.__state["mount_target_security_group_id"]} is not in mount_target_security_groups')
             except Exception as e:
                 logging.warning(f'An error occurred during Detach the Security Group from the Mount Target: {str(e)}')
         else:
@@ -398,11 +402,11 @@ class Efs:
     def __create_access_point(self):
         create_access_point_response = self.clients['efs'].create_access_point(
             Tags=[
-                {
-                    'Key': 'Name',
-                    'Value': f'TemporaryAccessPoint{str(time.time())}'
-                },
-            ] + self.tags,
+                     {
+                         'Key': 'Name',
+                         'Value': f'TemporaryAccessPoint{str(time.time())}'
+                     },
+                 ] + self.tags,
             FileSystemId=self.file_system_id,
             PosixUser={
                 'Uid': 0,
