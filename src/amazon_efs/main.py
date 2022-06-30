@@ -10,6 +10,7 @@ import tempfile
 
 class Efs:
     __LOCAL_MOUNT_PATH = '/mnt/fs'
+    __options = None
 
     __state = {
         'function_name': None,
@@ -23,6 +24,8 @@ class Efs:
     }
 
     def __init__(self, file_system_id, options=None):
+        self.__options = options
+
         if options is not None and options.get('state') is not None:
             self.__state = options['state']
         if options is not None and options.get('tags') is not None:
@@ -370,10 +373,19 @@ class Efs:
     def __create_s3_bucket(self):
         stage_bucket = f'efs-stage-bucket-{str(time.time()).replace(".", "")}'
 
-        self.clients['s3'].create_bucket(
-            ACL='private',
-            Bucket=stage_bucket,
-        )
+        if self.region is not None and self.region != 'us-east-1':
+            self.clients['s3'].create_bucket(
+                ACL='private',
+                Bucket=stage_bucket,
+                CreateBucketConfiguration={
+                    'LocationConstraint': self.region
+                }
+            )
+        else:
+            self.clients['s3'].create_bucket(
+                ACL='private',
+                Bucket=stage_bucket,
+            )
 
         self.clients['s3'].put_bucket_encryption(
             Bucket=stage_bucket,
@@ -547,6 +559,7 @@ class Efs:
         code_string = """import subprocess
 import boto3
 import os
+import shutil
 
 s3 = boto3.resource('s3')
 s3_client = boto3.client('s3')
@@ -610,11 +623,7 @@ def lambda_handler(event, context):
         
         if filename.endswith('*'):
             head, tail = os.path.split(filename)
-            try:
-                result = subprocess.check_output(['rm', '-rf', head], cwd=MOUNT_PATH)
-            except subprocess.CalledProcessError as e:
-                print(e.output)
-                raise e
+            shutil.rmtree(MOUNT_PATH + '/' + head)
         else:
             try:
                 result = subprocess.check_output(['rm', filename], cwd=MOUNT_PATH)
@@ -648,6 +657,8 @@ def lambda_handler(event, context):
                 'ZipFile': data
             },
             Timeout=900,
+            MemorySize=self.__options['lambda']['memory_size'] if self.__options and self.__options.get('lambda') and
+                                                                  self.__options['lambda'].get('memory_size') else 128,
             Environment={
                 'Variables': {
                     'TEMP_BUCKET': self.__state['stage_bucket']
